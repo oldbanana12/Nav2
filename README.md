@@ -7,6 +7,8 @@
 
 # File Format
 
+This repository includes a .bt file that can be used with 010 Editor to inspect the data structures of .nav2 files.
+
 ## Concepts
 
 .nav2 files contain 3D geometry in the form of faces and vertices along with graph data structures that the AI pathfinding system uses to traverse the mesh. There are a number of ways this is divided up and to fully understand the format, we have to define various terms:
