@@ -27,6 +27,12 @@ This repository includes a .bt file that can be used with 010 Editor to inspect 
       - [Subsection4Entry](#subsection4entry)
     - [Subsection 5 (Flags?)](#subsection-5-flags)
     - [Subsection 6 (Navmesh References)](#subsection-6-navmesh-references)
+  - [NavmeshChunk](#navmeshchunk)
+    - [Header](#header-2)
+    - [Subsection 1 (Vertices)](#subsection-1-vertices)
+    - [Subsection 2 (Face Offsets)](#subsection-2-face-offsets)
+    - [Subsection 3 (Faces)](#subsection-3-faces)
+      - [Subsection3Entry](#subsection3entry)
   
 # Concepts
 
@@ -141,24 +147,24 @@ Each __NavWorld__, __NavmeshChunk__, __SegmentGraph__ and __SegmentChunk__ entry
 
 ### Header
 
-| Field                       | Type                | Description                                                                                                                                                                                |
-| --------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Common Header               | Common Entry Header | 16 bytes as described in the "Common Entry Header" described above                                                                                                                         |
-| Subsection 1 Offset         | uint                | The offset from the _end_ of the common entry header to the start of "Subsection 1" which describes the 3D positions of the points within the graph data structure.                        |
-| Subsection 2 Offset         | uint                | The offset from the _end_ of the common entry header to the start of "Subsection 2" which provides some array lengths for this node and some indexes into other subsections.               |
-| Subsection 4 Offset         | uint                | The offset from the _end_ of the common entry header to the start of "Subsection 4" which is an array of edges between the nodes in the __NavWorld__ graph.                                |
-| Subsection 3 Offset         | uint                | The offset from the _end_ of the common entry header to the start of "Subsection 3" which details which other nodes a node is connected to.                                                |
-| u1                          | uint                | Unknown. Usually `0`.                                                                                                                                                                      |
-| u2                          | uint                | Unknown. Usually `0`.                                                                                                                                                                      |
-| Subsection 5 Offset         | uint                | The offset from the _end_ of the common entry header to the start of "Subsection 5" which seems to be a way of providing flags for different __Segments__.                                 |
-| u3                          | uint                | Unknown. Usually `0`.                                                                                                                                                                      |
-| Subsection 6 Offset         | uint                | The offset from the _end_ of the common entry header to the start of "Subsection 6" which provides pointers to the mesh to indicate which part of the mesh a node in the graph belongs to. |
-| Number of Points            | ushort              | The number of nodes within this graph structure.                                                                                                                                           |
-| Number of Edges             | ushort              | The number of edges within this graph structure.                                                                                                                                           |
-| Padding?                    | ushort              | Probably padding, usually `0`.                                                                                                                                                             |
-| Padding?                    | ushort              | Probably padding, usually `0`.                                                                                                                                                             |
-| Padding?                    | ushort              | Probably padding, usually `0`.                                                                                                                                                             |
-| Number of Section 5 Entries | ushort              | The number of entries within "Subsection 5". This should be equal to the number of __Segments__ within the __Group__                                                                       |
+| Field                       | Type                                        | Description                                                                                                                                                                                |
+| --------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Common Header               | [Common Entry Header](#common-entry-header) | 16 bytes as described in the [Common Entry Header](#common-entry-header).                                                                                                                  |
+| Subsection 1 Offset         | uint                                        | The offset from the _end_ of the common entry header to the start of "Subsection 1" which describes the 3D positions of the points within the graph data structure.                        |
+| Subsection 2 Offset         | uint                                        | The offset from the _end_ of the common entry header to the start of "Subsection 2" which provides some array lengths for this node and some indexes into other subsections.               |
+| Subsection 4 Offset         | uint                                        | The offset from the _end_ of the common entry header to the start of "Subsection 4" which is an array of edges between the nodes in the __NavWorld__ graph.                                |
+| Subsection 3 Offset         | uint                                        | The offset from the _end_ of the common entry header to the start of "Subsection 3" which details which other nodes a node is connected to.                                                |
+| u1                          | uint                                        | Unknown. Usually `0`.                                                                                                                                                                      |
+| u2                          | uint                                        | Unknown. Usually `0`.                                                                                                                                                                      |
+| Subsection 5 Offset         | uint                                        | The offset from the _end_ of the common entry header to the start of "Subsection 5" which seems to be a way of providing flags for different __Segments__.                                 |
+| u3                          | uint                                        | Unknown. Usually `0`.                                                                                                                                                                      |
+| Subsection 6 Offset         | uint                                        | The offset from the _end_ of the common entry header to the start of "Subsection 6" which provides pointers to the mesh to indicate which part of the mesh a node in the graph belongs to. |
+| Number of Points            | ushort                                      | The number of nodes within this graph structure.                                                                                                                                           |
+| Number of Edges             | ushort                                      | The number of edges within this graph structure.                                                                                                                                           |
+| Padding?                    | ushort                                      | Probably padding, usually `0`.                                                                                                                                                             |
+| Padding?                    | ushort                                      | Probably padding, usually `0`.                                                                                                                                                             |
+| Padding?                    | ushort                                      | Probably padding, usually `0`.                                                                                                                                                             |
+| Number of Section 5 Entries | ushort                                      | The number of entries within "Subsection 5". This should be equal to the number of __Segments__ within the __Group__                                                                       |
 
 ### Subsection 1 (Node positions)
 | Field                      | Type               | Description                                                                                                                                                                                                     |
@@ -206,3 +212,42 @@ There is one Subsection 5 entry for each __Segment__ in the .nav2 file, so it pr
 | Field                                       | Type   | Description                                                                                                                                                  |
 | ------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | navmeshSubsection2Index[`Number of points`] | ushort | An array of indexes into the Subsection2 array of the __NavmeshChunk__ in the same group. Used to associate the graph node with a physical piece of navmesh. |
+
+## NavmeshChunk
+### Header
+| Field               | Type                                        | Description                                                                                                                                          |
+| ------------------- | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Common Header       | [Common Entry Header](#common-entry-header) | 16 bytes as described in [Common Entry Header](#common-entry-header).                                                                                |
+| Subsection 1 Offset | uint                                        | The offset from the _end_ of the common entry header to the start of "Subsection 1" which describes the 3D positions of vertices that form the mesh. |
+| Subsection 2 Offset | uint                                        | The offset from the _end_ of the common entry header to the start of "Subsection 2" which provides some offsets into the Subsection 3 Array.         |
+| Subsection 3 Offset | uint                                        | The offset from the _end_ of the common entry header to the start of "Subsection 3" which describes the faces of the navmesh.                        |
+| uu1                 | ushort                                      | Unknown. Usually `0`.                                                                                                                                |
+| uu2                 | ushort                                      | Unknown. Usually `0`.                                                                                                                                |
+| uu3                 | ushort                                      | Unknown. Usually `0`.                                                                                                                                |
+| uu4                 | ushort                                      | Unknown. Usually `0`.                                                                                                                                |
+| uu5                 | ushort                                      | Unknown. Usually `0`.                                                                                                                                |
+| uu6                 | ushort                                      | Unknown. Usually `0`.                                                                                                                                |
+| Number of faces     | ushort                                      | The number of navmesh faces contained in this entry                                                                                                  |
+| Number of vertices  | ushort                                      | The number of navmesh vertices contained in this entry                                                                                               |
+| u4                  | ushort                                      | Probably padding, usually `0`.                                                                                                                       |
+| u5                  | ushort                                      | Probably padding, usually `0`.                                                                                                                       |
+
+### Subsection 1 (Vertices)
+| Field                          | Type               | Description                                                                                                                                                                                               |
+| ------------------------------ | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| vertices[`Number of vertices`] | Vertex (3x ushort) | An array of 3D points (encoded as ushorts), where each entry is a vertex in the navmesh. To get the proper floating point 3D co-ordinates, divide each component by the divisors in the main file header. |
+
+### Subsection 2 (Face Offsets)
+| Field                     | Type | Description                                                                                                                                                                                                                                                                          |
+| ------------------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| offset[`Number of faces`] | uint | Perform a bitwise AND with `0x3ffff` and multiply by `2` to get the offset into the Subsection 3 array for this face. If a bitwise right shift of this value by `0x12` results in an odd number, then this face has 4 vertices. Though 4-vertex faces haven't been seen in the wild. |
+
+### Subsection 3 (Faces)
+| Field                    | Type             | Description                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------ | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| faces[`Number of faces`] | Subsection3Entry | An array of Subsection3Entry structures (described below). These structures describe an individual face within the navmesh. Note that it is not possible to re-assemble the whole Navmesh with just this __NavmeshChunk__ section. There is some additional information in the __SegmentChunk__ section that describes the relationship between the faces and the vertices. |
+
+#### Subsection3Entry
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| adjacentFaces[`3 or 4`] | short[] | The indexes of the other faces that share an edge with this face. `-1` if there isn't a face on that side. There are usually 3 entries here, but note that it may be possible to have 4-edge faces as described in the 
