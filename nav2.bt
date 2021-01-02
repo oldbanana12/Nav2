@@ -142,8 +142,8 @@ struct Manifest
             ushort u2;
             uint payloadOffset;
             ENTRY_TYPE_UINT8 entryType;
-            ubyte entrySize;        // Not always?
-            ushort n4;              // Probably an entry index, but to what? Values overlap.
+            ushort entrySize;
+            ubyte n4;
         } subentries[3];
     } manifest[manifestEntryCount];
 }manifest<bgcolor=COLOR_MANIFEST>;
