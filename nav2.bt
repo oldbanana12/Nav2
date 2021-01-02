@@ -197,7 +197,7 @@ struct NavWorld
     {
         struct NavWorldSubsection2Entry
         {
-            ushort NavWorldSubsection3Index;
+            ushort NavWorldSubsection3Offset;
             ushort subsection5Index;
             byte countA;
             byte countB;
@@ -213,7 +213,7 @@ struct NavWorld
         local int j;
         for (i = 0; i < numPoints; i++) 
         {
-            FSeek (startPosition + subsection3Offset + (subsection2.entries[i].NavWorldSubsection3Index * 2));
+            FSeek (startPosition + subsection3Offset + (subsection2.entries[i].NavWorldSubsection3Offset * 2));
             struct NavWorldSubsection3Entry
             {
                 for (j = 0; j < subsection2.entries[i].countA; j++) {

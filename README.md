@@ -19,8 +19,14 @@ This repository includes a .bt file that can be used with 010 Editor to inspect 
   - [Common Entry Header](#common-entry-header)
   - [NavWorld](#navworld)
     - [Header](#header-1)
-    - [Subsection 1](#subsection-1)
-    - [Subsection 2](#subsection-2)
+    - [Subsection 1 (Node positions)](#subsection-1-node-positions)
+    - [Subsection 2 (Extra Node Info)](#subsection-2-extra-node-info)
+      - [Subsection2Entry](#subsection2entry)
+    - [Subsection 3 (Node adjacencies)](#subsection-3-node-adjacencies)
+    - [Subsection 4 (Edges)](#subsection-4-edges)
+      - [Subsection4Entry](#subsection4entry)
+    - [Subsection 5 (Flags?)](#subsection-5-flags)
+    - [Subsection 6 (Navmesh References)](#subsection-6-navmesh-references)
   
 # Concepts
 
@@ -28,7 +34,7 @@ This repository includes a .bt file that can be used with 010 Editor to inspect 
 
 * We'll use the word __tile__ to define one section of the game map when larger maps are involved (e.g. afgh). You see these tiles in the filenames of various files (i.e. `afgh_139_141_nav.nav2`)
 * A __group__ is a logical division of the data structures in a single .nav2 file. If a navmesh is self contained and is not part of a tiled map, it will likely only have one group. If the .nav2 file forms part of a tiled map, it will have one main group and one group for each bordering tile.
-* A __segment__ is a subdivision of the navmesh within the nav2 file. Within each group, the navmeshes are generally divided into these segments. These form a grid, but some of the segments are further subdivided if there is a lot of geometry in a particular area.
+* A __segment__ is a subdivision of the navmesh within the nav2 file. Within each group, the navmeshes are generally divided into these segments. These form a grid, but some of the segments are further subdivided if there is a lot of geometry in a particular area, or if particular areas need to be specially divided (maybe to differentiate water etc).
 
 ## Co-ordinates as integers
 
@@ -149,14 +155,54 @@ Each __NavWorld__, __NavmeshChunk__, __SegmentGraph__ and __SegmentChunk__ entry
 | Subsection 6 Offset         | uint                | The offset from the _end_ of the common entry header to the start of "Subsection 6" which provides pointers to the mesh to indicate which part of the mesh a node in the graph belongs to. |
 | Number of Points            | ushort              | The number of nodes within this graph structure.                                                                                                                                           |
 | Number of Edges             | ushort              | The number of edges within this graph structure.                                                                                                                                           |
-| Padding?                    | ushort              | Probably padding, usually `0`                                                                                                                                                              |
-| Padding?                    | ushort              | Probably padding, usually `0`                                                                                                                                                              |
-| Padding?                    | ushort              | Probably padding, usually `0`                                                                                                                                                              |
+| Padding?                    | ushort              | Probably padding, usually `0`.                                                                                                                                                             |
+| Padding?                    | ushort              | Probably padding, usually `0`.                                                                                                                                                             |
+| Padding?                    | ushort              | Probably padding, usually `0`.                                                                                                                                                             |
 | Number of Section 5 Entries | ushort              | The number of entries within "Subsection 5". This should be equal to the number of __Segments__ within the __Group__                                                                       |
 
-### Subsection 1
+### Subsection 1 (Node positions)
 | Field                      | Type               | Description                                                                                                                                                                                                     |
 | -------------------------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | points[`Number of points`] | Vertex (3x ushort) | An array of 3D points (encoded as ushorts), where each entry is a node in the graph structure. To get the proper floating point 3D co-ordinates, divide each component by the divisors in the main file header. |
 
-### Subsection 2
+### Subsection 2 (Extra Node Info)
+| Field                       | Type             | Description                                                                                                                                                    |
+| --------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| entries[`Number of points`] | Subsection2Entry | An array of __Subsection2Entry__ structures (described below). This subsection is largely used to determine the size and related indexes of other subsections. |
+
+#### Subsection2Entry
+| Field              | Type   | Description                                                                                                                                                                                         |
+| ------------------ | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Section 3 Offset   | ushort | `(offset / 2)` into "Subsection 3" of where to find the __Subsection3Entry__ that relates to this node. Multiply by `2` to get the actual byte offset from the start of "Subsection 3".             |
+| Subsection 5 Index | ushort | The index into the "Subsection 5" array that relates to this node.                                                                                                                                  |
+| countA             | byte   | The number of "type A" edges that connect to this node. These are the standard edges where two different nodes connect to each other.                                                               |
+| countB             | byte   | The number of "type B" edges that connect to this node. These are for the special case where there are two nodes with the same physical position, because they exist in two different __Segments__. |
+
+### Subsection 3 (Node adjacencies)
+| Field                | Type      | Description                                                                                                                                                  |
+| -------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| typeAEdges[`countA`] | 2x ushort | The first ushort is the index of the node connected by this edge. The second is the index into the edges array (subsection 4).                               |
+| typeBEdges[`countB`] | ushort    | The index of the node connected by this edge. Remember, this node has the same physical position as the current node, but exists in a different __Segment__. |
+
+### Subsection 4 (Edges)
+| Field                    | Type             | Description                                                                                                                                |
+| ------------------------ | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| edges[`Number of edges`] | Subsection4Entry | An array of `Subsection4Entry` structures (described below). These structures describe an individual edge within the graph data structure. |
+
+#### Subsection4Entry
+| Field              | Type    | Description                                                                                                                                                                                                                                                                                                 |
+| ------------------ | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| weight             | ushort  | The weighting of this graph edge (i.e. distance between the two connected nodes). The formula used to determine this weighting by the MGSV .nav2 generator has not been determined. However, pathfinding algorithms usually just work on the relative weights between edges, so it's likely not important.  |
+| Subsection 5 Index | ushort  | The index into the "Subsection 5" array that relates to this edge.                                                                                                                                                                                                                                          |
+| nodes              | 2x byte | The "from" and "to" node indexes for this edge. Note that these indexes start again from `0` every time the "Subsection 5 Index" is incremented. So a value of `3` when "Subsection 5 Index" is `2`, is `3 + (total nodes associated with indexes 0 and 1 of subsection 5)` in terms of overall node index. |
+
+### Subsection 5 (Flags?)
+There is one Subsection 5 entry for each __Segment__ in the .nav2 file, so it provides a means of associating different nodes and edges with different __Segments__. For the most part, these __Segments__ just form a grid, but some maps have this grid system further divided into more natural formations (like rivers etc).
+| Field                                   | Type   | Description                                                                                                                                                                                                                                                                                                                                                                      |
+| --------------------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| flags[`Number of subsection 5 entries`] | ushort | Not fully understood. From the various values seen in the wild. These appears to be some kind of bitfield that probably forms some kind of flag system. It likely determines something like what kinds of entity are allowed to use this segment of the navigation graph, or possibly what animations/sounds to play. Common values are `1249` (`0xE104`) and `1257` (`0xE904`). |
+
+### Subsection 6 (Navmesh References)
+| Field                                       | Type   | Description                                                                                                                                                  |
+| ------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| navmeshSubsection2Index[`Number of points`] | ushort | An array of indexes into the Subsection2 array of the __NavmeshChunk__ in the same group. Used to associate the graph node with a physical piece of navmesh. |
