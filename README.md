@@ -386,7 +386,11 @@ There is one Subsection 5 entry for each __Segment__ in the .nav2 file, so it pr
 
 ## Section2 (Name TBD)
 
-This section is less well understood, as evidenced by the fact it doesn't have a name yet. However, it is present in *most* nav2 files. It appears to encode another graph data structure, similar to __NavWorld__ and __SegmentGraph__, the purpose of which is not clear yet. It typically consists of 3 entries, however, usually only the first one encodes any useful information. The format of the entries is as follows:
+This section is less well understood, as evidenced by the fact it doesn't have a name yet. However, it is present in *most* nav2 files. It appears to encode another graph data structure, similar to __NavWorld__ and __SegmentGraph__, the purpose of which is not clear yet. It typically consists of 3 entries, however, usually only the first one encodes any useful information. 
+
+The Nav2Parser tool extracts the "type A" edges and exports them to an .obj that can be imported alongside the actual navmesh to inspect the graph. Maybe someone can figure out what this section is for by figuring out what the logic to these graphs is visually.
+
+The format of the Section2 entries is as follows:
 
 ### Section2Entry
 
