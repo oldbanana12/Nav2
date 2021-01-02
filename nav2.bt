@@ -553,8 +553,8 @@ if (header.section2Offset)
                     struct Section2Subsection2Entry {
                         if (subsection1Entries[i].countA > 0) {
                             struct AEntries {
-                                ushort u1;
-                                ushort u2;
+                                ushort weight; // Possibly ?
+                                ushort adjacentNodeIndex;
                             } aEntries[subsection1Entries[i].countA];
                         }
 
@@ -570,14 +570,9 @@ if (header.section2Offset)
             FSeek(startOffset + subsection3RelativeOffset);
             struct Section2Subsection3
             {
-                ubyte u1;
-                ubyte u2;
-                ubyte u3;
-                ubyte u4;
-                ubyte u5;
-                ubyte u6;
-                ubyte u7;
-                ubyte u8;
+                uint u1;
+                ushort u5;
+                ushort u7;
             } subsection3Entries[subEntryCount];
 
             FSeek(startOffset + subsection4RelativeOffset);
