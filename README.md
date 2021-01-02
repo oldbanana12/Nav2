@@ -39,6 +39,10 @@ This repository includes a .bt file that can be used with 010 Editor to inspect 
       - [Subsection1Entry](#subsection1entry)
     - [Subsection 2 (Mesh Information)](#subsection-2-mesh-information)
       - [Subsection2Entry](#subsection2entry-1)
+  - [SegmentGraph](#segmentgraph)
+    - [Header](#header-4)
+    - [Subsection 1 (Node Positions)](#subsection-1-node-positions-1)
+    - [Subsection 2 (Edge Counts)](#subsection-2-edge-counts)
   
 # Concepts
 
@@ -300,3 +304,33 @@ There is one Subsection 5 entry for each __Segment__ in the .nav2 file, so it pr
 | Number of faces                     | byte   | Number of faces in this segment. Used as a count to iterate through __NavmeshChunk__ array from the index provided above.           |
 | u7                                  | byte   | Unknown, seems to be `(faces * 3)` ?                                                                                                |
 | Number of edges                     | byte   | Number of edges in this segment.                                                                                                    |
+
+## SegmentGraph
+### Header
+| Field               | Type                                        | Description                                                                                                                                                                                                     |
+| ------------------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Common Header       | [Common Entry Header](#common-entry-header) | 16 bytes as described in [Common Entry Header](#common-entry-header).                                                                                                                                           |
+| Subsection 1 Offset | uint                                        | The offset from the _end_ of the common entry header to the start of "Subsection 1" which describes the 3D positions of the points within the graph data structure.                                             |
+| Subsection 2 Offset | uint                                        | The offset from the _end_ of the common entry header to the start of "Subsection 2" which describes how many graph edges of what type this graph node has.                                                      |
+| Subsection 3 Offset | uint                                        | The offset from the _end_ of the common entry header to the start of "Subsection 3" which describes the graph edges connected to each node.                                                                     |
+| uu1                 | uint                                        | Almost certainly padding to the next 16-byte boundary, often `0`.                                                                                                                                               |
+| Total Size          | uint                                        | The total size in bytes of this __SegmentGraph__ entry, excluding the [Common Entry Header](#common-entry-header), but including any padding necessary to align the end of the section with a 16-byte boundary. |
+| Entry Count         | uint                                        | The number of array entries in each of the 3 subsections.                                                                                                                                                       |
+| uu3                 | ushort                                      | Unknown, often `0`.                                                                                                                                                                                             |
+| Total Edges         | uint                                        | The total number of edges that are present in the graph represented by this entry.                                                                                                                              |
+| Padding             | ushort                                      | Set to `0`                                                                                                                                                                                                      |
+
+### Subsection 1 (Node Positions)
+| Field                 | Type                 | Description                                                                                                                                                                                                     |
+| --------------------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| points[`Entry Count`] | Vertex[] (3x ushort) | An array of 3D points (encoded as ushorts), where each entry is a node in the graph structure. To get the proper floating point 3D co-ordinates, divide each component by the divisors in the main file header. |
+
+### Subsection 2 (Edge Counts)
+| Field                                 | Type                | Description                                                                                                                                                                       |
+| ------------------------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Subsection 3 Offset                   | 24-bit uint **(!)** | `(offset / 2)` into "Subsection 3" of where to find the Subsection3Entry that relates to this node. Multiply by 2 to get the actual byte offset from the start of "Subsection 3". |
+| Number of "Type 1" (Same group) Edges | byte                | Number of "Type 1" edges connected to this node                                                                                                                                   |
+| u3                                    | short               | Unknown, mostly `0`                                                                                                                                                               |
+| u4                                    | uint                | Unknown, always `0xFFFF` ?                                                                                                                                                        |
+| Number of "Type 2" (Off-group) Edges  | byte                | Number of "Type 2" edges connected to this node                                                                                                                                   |
+| Number of "Type 3" (Off-mesh) Edges   | byte                | Number of "Type 3" edges connected to this node                                                                                                                                   |
