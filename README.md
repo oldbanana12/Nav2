@@ -49,6 +49,12 @@ This repository includes a .bt file that can be used with 010 Editor to inspect 
       - [Type3Edge (Different navmesh)](#type3edge-different-navmesh)
   - [Section2 (Name TBD)](#section2-name-tbd)
     - [Section2Entry](#section2entry)
+      - [Subsection1Entry](#subsection1entry-1)
+      - [Subsection2Entry](#subsection2entry-2)
+      - [Subsection3Entry](#subsection3entry-1)
+      - [Subsection4Entry](#subsection4entry-1)
+      - [Subsection5Entry](#subsection5entry)
+      - [Subsection6Entry](#subsection6entry)
   
 # Concepts
 
@@ -400,3 +406,39 @@ This section is less well understood, as evidenced by the fact it doesn't have a
 | subsection4Entries[`entry count`] | Subsection4Entry[] | An array of Subsection4Entry structures (as described below)                                                                                                                                                                |
 | subsection5Entries[24?]           | Subsection5Entry[] | An array of Subsection5Entry structures (as described below)                                                                                                                                                                |
 | subsection6Entries[?]             | Subsection6Entry[] | An array of Subsection6Entry structures (as described below)                                                                                                                                                                |
+
+#### Subsection1Entry
+| Field               | Type               | Description                                                                                       |
+| ------------------- | ------------------ | ------------------------------------------------------------------------------------------------- |
+| position            | Vertex (3x ushort) | The 3D position of this node within the graph structure.                                          |
+| flags               | ushort             | Seems to hold similar values to the __NavWorld__ flags (?) field.                                 |
+| Subsection 2 Offset | ushort             | Offset from the start of Subsection 2 in bytes where the corresponding Subsection 2 entry starts. |
+| Type B Count        | ushort             | The number of "type B" Subsection 2 entries.                                                      |
+| Type A Count        | ushort             | The number of "type A" Subsection 2 entries.                                                      |
+
+#### Subsection2Entry
+| Field                          | Type                        | Description                                                                                                 |
+| ------------------------------ | --------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Type A Entries[`Type A Count`] | Array of 2x ushorts         | The first ushort probably encodes the weight of this edge, while the other encodes the adjacent node index. |
+| Type B Entries[`Type B Count`] | Array of ushort or 2x bytes | Unsure which data types are correct here or what this encodes                                               |
+
+#### Subsection3Entry
+| Field | Type               | Description                                                                 |
+| ----- | ------------------ | --------------------------------------------------------------------------- |
+| u1    | uint?              | Possibly some sort of flags field again? Values seem to be quite repetitive |
+| u5    | ushort?            | Unknown                                                                     |
+| u7    | ushort or 2x byte? | Unknown                                                                     |
+
+#### Subsection4Entry
+| Field | Type    | Description |
+| ----- | ------- | ----------- |
+| n1    | ushort? | Unknown     |
+
+#### Subsection5Entry
+| Field  | Type  | Description                           |
+| ------ | ----- | ------------------------------------- |
+| u1[24] | byte? | Always 24 bytes long? Unknown content |
+
+#### Subsection6Entry
+
+Unknown
