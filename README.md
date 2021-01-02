@@ -1,15 +1,28 @@
-# MGS .nav2 Information
+# MGS .nav2 Information <!-- omit in toc -->
 
-# Tools
+# Tools <!-- omit in toc -->
 
 - [oldbanana12/Obj2Nav2](https://github.com/oldbanana12/Obj2Nav2) (Converts arbitrary wavefront .obj files to MGSV compatible .nav2 files)
 - [oldbanana12/Nav2Parser](https://github.com/oldbanana12/Nav2Parser) (Parses .nav2 files and extracts the navmesh amongst other info)
 
-# File Format
-
 This repository includes a .bt file that can be used with 010 Editor to inspect the data structures of .nav2 files.
 
-## Concepts
+# Contents <!-- omit in toc -->
+
+- [Concepts](#concepts)
+  - [Co-ordinates as integers](#co-ordinates-as-integers)
+- [Structure](#structure)
+- [Detailed Description](#detailed-description)
+  - [Header](#header)
+    - [Manifest](#manifest)
+    - [ManifestEntry](#manifestentry)
+  - [Common Entry Header](#common-entry-header)
+  - [NavWorld](#navworld)
+    - [Header](#header-1)
+    - [Subsection 1](#subsection-1)
+    - [Subsection 2](#subsection-2)
+  
+# Concepts
 
 .nav2 files contain 3D geometry in the form of faces and vertices along with graph data structures that the AI pathfinding system uses to traverse the mesh. There are a number of ways this is divided up and to fully understand the format, we have to define various terms:
 
@@ -21,7 +34,7 @@ This repository includes a .bt file that can be used with 010 Editor to inspect 
 
 A lot of the Vector3 positions in .nav2 files are encoded as unsigned integers. Turning these back into floating point numbers in the same co-ordinate space used elsewhere in the level involves dividing the values by some divisors found in the header of the file and offseting the result based on the origin of the file (also found in the header).
 
-## Structure
+# Structure
 
 For each group in the file, there are generally 4 sections (NavWorld, NavmeshChunk, SegmentChunk, and SegmentGraph). In turn, each of these sections describes the following:
 
@@ -49,9 +62,9 @@ For each group in the file, there are generally 4 sections (NavWorld, NavmeshChu
 
 Finally, .nav2 files also always seem to have a __NavSystem__ at the end of the file. Not a lot is known about the fields in this section, but it seems to be another way of dividing the .nav2 up into a grid. The header contains the co-ordinates of the origin of the navmesh and some integers that determine how many pieces to divide it into. Then for each piece, it describes a list of segments that fall within that piece.
 
-## Detailed Description
+# Detailed Description
 
-### Header
+## Header
 
 | Field                    | Type               | Description                                                                                                                                                                                                                                                                                            |
 | ------------------------ | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -100,6 +113,50 @@ The __Manifest__ provides an index of sorts for the entries within the .nav2 fil
 | u1b                   | byte   | Not fully understood, this possibly relates to `u0a` in the header somehow as it often seems to match.                                                                     |
 | u2                    | ushort | Not fully understood. As above, this probably relates to the tiling system as it's usually 0 for standalone maps and has the same value across all entries for tiled maps. |
 | Payload Offset        | uint   | Offset from the start of the file where the content of this entry is found. Each entry usually has a small header before it, and this offset skips over that.              |
-| Entry Type            | byte   | `0` = __NavWorld__ , `1` = __NavmeshChunk__, `2` = __SegmentGraph__                                                                                                        |
+| Entry Type            | byte   | `0` = __NavWorld__ , `1` = __NavmeshChunk__, `3` = __SegmentGraph__                                                                                                        |
 | Entry Size            | ushort | Total size of the entry in bytes (including the header that the offset skips)                                                                                              |
 | n4 (Probably padding) | byte   | Almost certainly padding                                                                                                                                                   |
+
+## Common Entry Header
+
+Each __NavWorld__, __NavmeshChunk__, __SegmentGraph__ and __SegmentChunk__ entry starts with a 16-byte header. The format and fields within this header are the same for all of the entry types as described below:
+
+| Field             | Type   | Description                                                                                                                                                         |
+| ----------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Entry Type        | ushort | `0` = __NavWorld__ , `1` = __NavmeshChunk__, `3` = __SegmentGraph__, `4` = __SegmentChunk__                                                                         |
+| u1                | ushort | Unknown, usually `0`                                                                                                                                                |
+| Next Entry Offset | uint   | The offset from the start of this header to start of header of the next entry in the nav2 file                                                                      |
+| Payload Offset    | uint   | The offset from the start of this header to the payload of the entry. Always `16`?                                                                                  |
+| Group ID          | byte   | The __group__ that this entry belongs to. For a standalone map, this will be `4`. Groups `0-3` correspond to the small slithers of navmesh that border other tiles. |
+| u2                | byte   | Not fully understood. Seems to match `u1b` in __ManifestEntry__, see there for more details.                                                                        |
+| n3                | ushort | Not fully understood. Seems to match `u2` in __ManifestEntry__, see there for more details.                                                                         |
+
+## NavWorld
+
+### Header
+
+| Field                       | Type                | Description                                                                                                                                                                                |
+| --------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Common Header               | Common Entry Header | 16 bytes as described in the "Common Entry Header" described above                                                                                                                         |
+| Subsection 1 Offset         | uint                | The offset from the _end_ of the common entry header to the start of "Subsection 1" which describes the 3D positions of the points within the graph data structure.                        |
+| Subsection 2 Offset         | uint                | The offset from the _end_ of the common entry header to the start of "Subsection 2" which provides some array lengths for this node and some indexes into other subsections.               |
+| Subsection 4 Offset         | uint                | The offset from the _end_ of the common entry header to the start of "Subsection 4" which is an array of edges between the nodes in the __NavWorld__ graph.                                |
+| Subsection 3 Offset         | uint                | The offset from the _end_ of the common entry header to the start of "Subsection 3" which details which other nodes a node is connected to.                                                |
+| u1                          | uint                | Unknown. Usually `0`.                                                                                                                                                                      |
+| u2                          | uint                | Unknown. Usually `0`.                                                                                                                                                                      |
+| Subsection 5 Offset         | uint                | The offset from the _end_ of the common entry header to the start of "Subsection 5" which seems to be a way of providing flags for different __Segments__.                                 |
+| u3                          | uint                | Unknown. Usually `0`.                                                                                                                                                                      |
+| Subsection 6 Offset         | uint                | The offset from the _end_ of the common entry header to the start of "Subsection 6" which provides pointers to the mesh to indicate which part of the mesh a node in the graph belongs to. |
+| Number of Points            | ushort              | The number of nodes within this graph structure.                                                                                                                                           |
+| Number of Edges             | ushort              | The number of edges within this graph structure.                                                                                                                                           |
+| Padding?                    | ushort              | Probably padding, usually `0`                                                                                                                                                              |
+| Padding?                    | ushort              | Probably padding, usually `0`                                                                                                                                                              |
+| Padding?                    | ushort              | Probably padding, usually `0`                                                                                                                                                              |
+| Number of Section 5 Entries | ushort              | The number of entries within "Subsection 5". This should be equal to the number of __Segments__ within the __Group__                                                                       |
+
+### Subsection 1
+| Field                      | Type               | Description                                                                                                                                                                                                     |
+| -------------------------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| points[`Number of points`] | Vertex (3x ushort) | An array of 3D points (encoded as ushorts), where each entry is a node in the graph structure. To get the proper floating point 3D co-ordinates, divide each component by the divisors in the main file header. |
+
+### Subsection 2
