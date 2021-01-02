@@ -33,6 +33,12 @@ This repository includes a .bt file that can be used with 010 Editor to inspect 
     - [Subsection 2 (Face Offsets)](#subsection-2-face-offsets)
     - [Subsection 3 (Faces)](#subsection-3-faces)
       - [Subsection3Entry](#subsection3entry)
+  - [SegmentChunk](#segmentchunk)
+    - [Header](#header-3)
+    - [Subsection 1 (Bounding boxes)](#subsection-1-bounding-boxes)
+      - [Subsection1Entry](#subsection1entry)
+    - [Subsection 2 (Mesh Information)](#subsection-2-mesh-information)
+      - [Subsection2Entry](#subsection2entry-1)
   
 # Concepts
 
@@ -167,14 +173,14 @@ Each __NavWorld__, __NavmeshChunk__, __SegmentGraph__ and __SegmentChunk__ entry
 | Number of Section 5 Entries | ushort                                      | The number of entries within "Subsection 5". This should be equal to the number of __Segments__ within the __Group__                                                                       |
 
 ### Subsection 1 (Node positions)
-| Field                      | Type               | Description                                                                                                                                                                                                     |
-| -------------------------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| points[`Number of points`] | Vertex (3x ushort) | An array of 3D points (encoded as ushorts), where each entry is a node in the graph structure. To get the proper floating point 3D co-ordinates, divide each component by the divisors in the main file header. |
+| Field                      | Type                 | Description                                                                                                                                                                                                     |
+| -------------------------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| points[`Number of points`] | Vertex[] (3x ushort) | An array of 3D points (encoded as ushorts), where each entry is a node in the graph structure. To get the proper floating point 3D co-ordinates, divide each component by the divisors in the main file header. |
 
 ### Subsection 2 (Extra Node Info)
-| Field                       | Type             | Description                                                                                                                                                    |
-| --------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| entries[`Number of points`] | Subsection2Entry | An array of __Subsection2Entry__ structures (described below). This subsection is largely used to determine the size and related indexes of other subsections. |
+| Field                       | Type               | Description                                                                                                                                                    |
+| --------------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| entries[`Number of points`] | Subsection2Entry[] | An array of __Subsection2Entry__ structures (described below). This subsection is largely used to determine the size and related indexes of other subsections. |
 
 #### Subsection2Entry
 | Field              | Type   | Description                                                                                                                                                                                         |
@@ -191,9 +197,9 @@ Each __NavWorld__, __NavmeshChunk__, __SegmentGraph__ and __SegmentChunk__ entry
 | typeBEdges[`countB`] | ushort    | The index of the node connected by this edge. Remember, this node has the same physical position as the current node, but exists in a different __Segment__. |
 
 ### Subsection 4 (Edges)
-| Field                    | Type             | Description                                                                                                                                |
-| ------------------------ | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| edges[`Number of edges`] | Subsection4Entry | An array of `Subsection4Entry` structures (described below). These structures describe an individual edge within the graph data structure. |
+| Field                    | Type               | Description                                                                                                                                |
+| ------------------------ | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| edges[`Number of edges`] | Subsection4Entry[] | An array of `Subsection4Entry` structures (described below). These structures describe an individual edge within the graph data structure. |
 
 #### Subsection4Entry
 | Field              | Type    | Description                                                                                                                                                                                                                                                                                                 |
@@ -204,14 +210,14 @@ Each __NavWorld__, __NavmeshChunk__, __SegmentGraph__ and __SegmentChunk__ entry
 
 ### Subsection 5 (Flags?)
 There is one Subsection 5 entry for each __Segment__ in the .nav2 file, so it provides a means of associating different nodes and edges with different __Segments__. For the most part, these __Segments__ just form a grid, but some maps have this grid system further divided into more natural formations (like rivers etc).
-| Field                                   | Type   | Description                                                                                                                                                                                                                                                                                                                                                                      |
-| --------------------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| flags[`Number of subsection 5 entries`] | ushort | Not fully understood. From the various values seen in the wild. These appears to be some kind of bitfield that probably forms some kind of flag system. It likely determines something like what kinds of entity are allowed to use this segment of the navigation graph, or possibly what animations/sounds to play. Common values are `1249` (`0xE104`) and `1257` (`0xE904`). |
+| Field                                   | Type     | Description                                                                                                                                                                                                                                                                                                                                                                      |
+| --------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| flags[`Number of subsection 5 entries`] | ushort[] | Not fully understood. From the various values seen in the wild. These appears to be some kind of bitfield that probably forms some kind of flag system. It likely determines something like what kinds of entity are allowed to use this segment of the navigation graph, or possibly what animations/sounds to play. Common values are `1249` (`0xE104`) and `1257` (`0xE904`). |
 
 ### Subsection 6 (Navmesh References)
-| Field                                       | Type   | Description                                                                                                                                                  |
-| ------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| navmeshSubsection2Index[`Number of points`] | ushort | An array of indexes into the Subsection2 array of the __NavmeshChunk__ in the same group. Used to associate the graph node with a physical piece of navmesh. |
+| Field                                       | Type     | Description                                                                                                                                                  |
+| ------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| navmeshSubsection2Index[`Number of points`] | ushort[] | An array of indexes into the Subsection2 array of the __NavmeshChunk__ in the same group. Used to associate the graph node with a physical piece of navmesh. |
 
 ## NavmeshChunk
 ### Header
@@ -233,9 +239,9 @@ There is one Subsection 5 entry for each __Segment__ in the .nav2 file, so it pr
 | u5                  | ushort                                      | Probably padding, usually `0`.                                                                                                                       |
 
 ### Subsection 1 (Vertices)
-| Field                          | Type               | Description                                                                                                                                                                                               |
-| ------------------------------ | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| vertices[`Number of vertices`] | Vertex (3x ushort) | An array of 3D points (encoded as ushorts), where each entry is a vertex in the navmesh. To get the proper floating point 3D co-ordinates, divide each component by the divisors in the main file header. |
+| Field                          | Type                 | Description                                                                                                                                                                                               |
+| ------------------------------ | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| vertices[`Number of vertices`] | Vertex[] (3x ushort) | An array of 3D points (encoded as ushorts), where each entry is a vertex in the navmesh. To get the proper floating point 3D co-ordinates, divide each component by the divisors in the main file header. |
 
 ### Subsection 2 (Face Offsets)
 | Field                     | Type | Description                                                                                                                                                                                                                                                                          |
@@ -243,9 +249,9 @@ There is one Subsection 5 entry for each __Segment__ in the .nav2 file, so it pr
 | offset[`Number of faces`] | uint | Perform a bitwise AND with `0x3ffff` and multiply by `2` to get the offset into the Subsection 3 array for this face. If a bitwise right shift of this value by `0x12` results in an odd number, then this face has 4 vertices. Though 4-vertex faces haven't been seen in the wild. |
 
 ### Subsection 3 (Faces)
-| Field                    | Type             | Description                                                                                                                                                                                                                                                                                                                                                                 |
-| ------------------------ | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| faces[`Number of faces`] | Subsection3Entry | An array of Subsection3Entry structures (described below). These structures describe an individual face within the navmesh. Note that it is not possible to re-assemble the whole Navmesh with just this __NavmeshChunk__ section. There is some additional information in the __SegmentChunk__ section that describes the relationship between the faces and the vertices. |
+| Field                    | Type               | Description                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------ | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| faces[`Number of faces`] | Subsection3Entry[] | An array of Subsection3Entry structures (described below). These structures describe an individual face within the navmesh. Note that it is not possible to re-assemble the whole Navmesh with just this __NavmeshChunk__ section. There is some additional information in the __SegmentChunk__ section that describes the relationship between the faces and the vertices. |
 
 #### Subsection3Entry
 | Field                   | Type    | Description                                                                                                                                                                                                                                                                                         |
@@ -256,3 +262,41 @@ There is one Subsection 5 entry for each __Segment__ in the .nav2 file, so it pr
 | v3                      | byte    | The index of the third vertex of this face, note that this will be offset by an amount described in the __SegmentChunk__ section.                                                                                                                                                                   |
 | v4 (optional)           | byte    | The index of the fourth vertex of this face, only present if this is a 4-vertex face as described in the [Subsection 2 (Face Offsets)](#subsection-2-face-offsets) section above.                                                                                                                   |
 | edgeIndices[`3 or 4`]   | byte[]  | Every edge in the navmesh has an index that is unique per-__segment__.                                                                                                                                                                                                                              |
+
+## SegmentChunk
+### Header
+| Field               | Type                                        | Description                                                                                                                                                                                                     |
+| ------------------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Common Header       | [Common Entry Header](#common-entry-header) | 16 bytes as described in [Common Entry Header](#common-entry-header).                                                                                                                                           |
+| Subsection 1 Offset | uint                                        | The offset from the _end_ of the common entry header to the start of "Subsection 1" which describes the bounding box of each __Segment__.                                                                       |
+| Subsection 2 Offset | uint                                        | The offset from the _end_ of the common entry header to the start of "Subsection 2" which describes which vertices and faces from the __NavmeshChunk__ form the __Segment__.                                    |
+| Total Size          | uint                                        | The total size in bytes of this __SegmentChunk__ entry, excluding the [Common Entry Header](#common-entry-header), but including any padding necessary to align the end of the section with a 16-byte boundary. |
+| Entry Count         | uint                                        | The total number of __Segment__ entries in this section. This will be equal to the number of __Segments__ in the .nav2.                                                                                         |
+
+### Subsection 1 (Bounding boxes)
+| Field                        | Type               | Description                                                                                                               |
+| ---------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| boundingBoxes[`Entry Count`] | Subsection1Entry[] | An array of Subsection1Entry structures (described below). These structures describe the bounds of an individual segment. |
+
+#### Subsection1Entry
+| Field | Type               | Description                                                                                                                                                                           |
+| ----- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| a     | Vertex (3x ushort) | One corner of the bounding box described as an integer vertex. Divide the values by the divisors in the main file header to get the actual floating point values.                     |
+| b     | Vertex (3x ushort) | The diagonally opposite corner of the bounding box described as an integer vertex. Divide the values by the divisors in the main file header to get the actual floating point values. |
+
+### Subsection 2 (Mesh Information)
+| Field                   | Type               | Description                                                                                                                                                     |
+| ----------------------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| meshInfo[`Entry Count`] | Subsection2Entry[] | An array of Subsection2Entry structures (described below) that detail what parts of the __NavmeshChunk__ section to use to build the mesh for this __Segment__. |
+
+#### Subsection2Entry
+| Field                               | Type   | Description                                                                                                                         |
+| ----------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Vertex Index Offset                 | ushort | The offset to add onto vertex indices when assembling faces for this __Segment__.                                                   |
+| __NavmeshChunk__ Subsection 2 Index | ushort | The index into the Subsection 2 array of the associated __NavmeshChunk__ from which to start assembling faces for this __Segment__. |
+| u3                                  | ushort | Unknown, probably padding to next 16-byte boundary, often `0`.                                                                      |
+| u4                                  | ushort | Unknown, probably padding to next 16-byte boundary, often `0`.                                                                      |
+| Number of verts                     | byte   | Number of vertices in this segment.                                                                                                 |
+| Number of faces                     | byte   | Number of faces in this segment. Used as a count to iterate through __NavmeshChunk__ array from the index provided above.           |
+| u7                                  | byte   | Unknown, seems to be `(faces * 3)` ?                                                                                                |
+| Number of edges                     | byte   | Number of edges in this segment.                                                                                                    |
