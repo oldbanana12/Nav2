@@ -100,7 +100,7 @@ For each group in the file, there are generally 4 sections (NavWorld, NavmeshChu
 
 * The __SegmentGraph__ is very similar to the __NavWorld__ in that it is another graph data structure with nodes, edges and weights etc... However, instead of a detailed node for each edge in the mesh, there is only one node for each segment. It is unclear what the purpose of this is. It's likely an optimisation mechanism for the pathfinding algorithm.
 
-Finally, .nav2 files also always seem to have a __NavSystem__ at the end of the file. Not a lot is known about the fields in this section, but it seems to be another way of dividing the .nav2 up into a grid. The header contains the co-ordinates of the origin of the navmesh and some integers that determine how many pieces to divide it into. Then for each piece, it describes a list of segments that fall within that piece.
+Finally, .nav2 files also always seem to have a __NavSystem__ at the end of the file. Not a lot is known about the purpose of this section, but it seems to be another way of dividing the .nav2 up into a grid. The header contains the co-ordinates of the origin of the navmesh and some integers that determine how many pieces to divide it into. Then for each piece, it describes a list of __Segments__ that fall within that piece.
 
 # Detailed Description
 
