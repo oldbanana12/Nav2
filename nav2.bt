@@ -622,35 +622,29 @@ if (header.navSystemOffset != 0)
             struct NavSystemSubsection1Entry
             {
                 uint section2relativeOffset;
-                ushort u1;
+                ushort entryCount;
                 ubyte u2;
                 ubyte u3;
             } entries[n1*u3];
         } subsection1<bgcolor=COLOR_NAVSYSTEM_SS1>;
 
-        FSeek(startOffset + subsection2Offset);
-        local int i = subsection2Offset;
-        local int64 curPos;
-        struct NavSystemSubsection2
-        {
-            while (i < subsection3Offset) {
-                curPos = FTell();
-                if (FSeek (curPos + 8) == -1) {
-                    break;
-                } else {
-                    FSeek(curPos);
+        struct NavSystemSubsection2 {
+            local int i;
+            local int j;
+            for (i = 0; i < n1*u3; i++) {
+                FSeek(startOffset + subsection1Offset + (i * sizeof(NavSystemSubsection1Entry)) + subsection1.entries[i].section2relativeOffset);
+                for (j = 0; j < subsection1.entries[i].entryCount; j++) {
+                    struct NavSystemSubsection2Entry {
+                        byte groupId;
+                        byte u1;
+                        ushort u2;
+                        uint count;
+                        ushort vals[count];
+                    } entries;
                 }
-
-                struct NavSystemSubsection2Entry
-                {
-                    byte groupId;
-                    byte u1;
-                    ushort u2;
-                    uint count;
-                    i += (8 + (count * 2));
-                    ushort vals[count];
-                } entries;
             }
         } subsection2<bgcolor=COLOR_NAVSYSTEM_SS2>;
+
+
     } navSystem <bgcolor=COLOR_NAVSYSTEM>;
 }
