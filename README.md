@@ -55,6 +55,12 @@ This repository includes a .bt file that can be used with 010 Editor to inspect 
       - [Subsection4Entry](#subsection4entry-1)
       - [Subsection5Entry](#subsection5entry)
       - [Subsection6Entry](#subsection6entry)
+  - [NavSystem](#navsystem)
+    - [Header](#header-5)
+    - [Subsection 1 (Offsets and Lengths)](#subsection-1-offsets-and-lengths)
+      - [Subsection1Entry](#subsection1entry-2)
+    - [Subsection 2 (Segment Assignment)](#subsection-2-segment-assignment)
+      - [Subsection2Entry](#subsection2entry-3)
   
 # Concepts
 
@@ -446,3 +452,45 @@ The format of the Section2 entries is as follows:
 #### Subsection6Entry
 
 Unknown
+
+## NavSystem
+### Header
+| Field               | Type                | Description                                                                                                                                                                                                                                                                                  |
+| ------------------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| origin              | Vector4? (4x float) | The origin of the 3D navmesh within this .nav2 file. Unsure what the 4th component of the Vector is for, if it even is a 4th component. **Note:** It seems to be important to ensure that the y component of this origin is below where any soldiers will spawn.                             |
+| n1                  | uint                | Number of X chunks that this __NavSystem__ is divided into.                                                                                                                                                                                                                                  |
+| n2                  | uint                | Unknown, possibly number of Y chunks that this __NavSystem__ is divided into. Always `1`?                                                                                                                                                                                                    |
+| n3                  | uint                | Number of Z chunks that this __NavSystem__ divided into.                                                                                                                                                                                                                                     |
+| Chunk Size          | uint                | The size of an individual chunk, these are square so this is both the X and Z dimension (possibly Y too). For example the afgh map is divided up into 10x10 __NavSystem__ chunks. So this value is `10` and n1 and n3 are set to `13` to accommodate the 128x128 total size of the map tile. |
+| n5                  | uint                | Unknown, usually `1280` for tiled maps and `128` for standalone.                                                                                                                                                                                                                             |
+| Subsection 1 Offset | uint                | The offset from the start of this __NavSystem__ header to the start of Subsection 1. Always `48`? This seems to be a fixed size header.                                                                                                                                                      |
+| Subsection 2 Offset | uint                | The offset from the start of this __NavSystem__ header to the start of Subsection 2, which describes which __Segments__ form a __NavSystem__ chunk.                                                                                                                                          |
+| Subsection 3 Offset | uint                | The offset from the start of this __NavSystem__ header to the start of Subsection 3. Subsection 3 seems to be very infrequently used, so this is usually just the offset to the end of the file.                                                                                             |
+
+### Subsection 1 (Offsets and Lengths)
+| Field            | Type               | Description                                                                                                           |
+| ---------------- | ------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| entries[`n1*n3`] | Subsection1Entry[] | An array of Subsection1Entry structures (described below) that are used to assign Subsection 2 entries to this chunk. |
+
+#### Subsection1Entry
+| Field               | Type   | Description                                                                                                                                                                                                                                                                                        |
+| ------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Subsection 2 Offset | uint   | The offset from this field to the start of an entry in Subsection 2.                                                                                                                                                                                                                               |
+| Entry Count         | ushort | The number of entries from Subsection 2 to assign to this chunk. Since a __NavSystem__ chunk can cover multiple __Groups__, it is sometimes necessary to have multiple Subsection 2 entries that relate to each group. Can be `0` if there is no navmesh contained within this Chunk (i.e. a hole) |
+| u2                  | byte   | Unknown purpose. Forms some kind of range with u3?                                                                                                                                                                                                                                                 |
+| u3                  | byte   | Unknown purpose. Forms some kind of range with u3?                                                                                                                                                                                                                                                 |
+
+### Subsection 2 (Segment Assignment)
+| Field                      | Type               | Description                                                                                                                                                                                                                    |
+| -------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| entries[`variable length`] | Subsection2Entry[] | An array of Subsection2Entry structures (described below) that encode which __SegmentChunk__ IDs are assigned to this __NavSystem__ chunk. The length of this array is the total of all of the entry counts from subsection 1. |
+
+#### Subsection2Entry
+| Field            | Type   | Description                                                                                                                                                                |
+| ---------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Group ID         | byte   | The group ID with which the following __SegmentChunk__ indexes are associated.                                                                                             |
+| u1               | byte   | Not fully understood, this possibly relates to `u0a` in the main header somehow as it often seems to match.                                                                |
+| u2               | ushort | Not fully understood. As above, this probably relates to the tiling system as it's usually 0 for standalone maps and has the same value across all entries for tiled maps. |
+| count            | uint   | The number of __SegmentChunk__ indexes that directly follow.                                                                                                               |
+| indexes[`count`] | ushort | An array of __SegmentChunk__ indexes that exist in the group given by the Group ID that should form part of this associated __NavSystem__ chunk.                           |
+

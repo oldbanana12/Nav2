@@ -608,7 +608,7 @@ if (header.navSystemOffset != 0)
         uint n1;
         uint n2;
         uint u3;
-        uint divisor;
+        uint chunkSize;
         uint n5;
         uint subsection1Offset;
         Assert(subsection1Offset == 48);
