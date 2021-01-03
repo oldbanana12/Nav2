@@ -195,9 +195,9 @@ Each __NavWorld__, __NavmeshChunk__, __SegmentGraph__ and __SegmentChunk__ entry
 | Number of Section 5 Entries | ushort                                      | The number of entries within "Subsection 5". This should be equal to the number of __Segments__ within the __Group__                                                                       |
 
 ### Subsection 1 (Node positions)
-| Field                      | Type                 | Description                                                                                                                                                                                                     |
-| -------------------------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| points[`Number of points`] | Vertex[] (3x ushort) | An array of 3D points (encoded as ushorts), where each entry is a node in the graph structure. To get the proper floating point 3D co-ordinates, divide each component by the divisors in the main file header. |
+| Field                      | Type                 | Description                                                                                                                                                                                                                                                                        |
+| -------------------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| points[`Number of points`] | Vertex[] (3x ushort) | An array of 3D points (encoded as ushorts), where each entry is a node in the graph structure. To get the proper floating point 3D co-ordinates, divide each component by the divisors in the main file header. There is one point for each midpoint of every edge in the navmesh. |
 
 ### Subsection 2 (Extra Node Info)
 | Field                       | Type               | Description                                                                                                                                                    |
@@ -339,9 +339,9 @@ There is one Subsection 5 entry for each __Segment__ in the .nav2 file, so it pr
 | Padding             | ushort                                      | Set to `0`                                                                                                                                                                                                      |
 
 ### Subsection 1 (Node Positions)
-| Field                 | Type                 | Description                                                                                                                                                                                                     |
-| --------------------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| points[`Entry Count`] | Vertex[] (3x ushort) | An array of 3D points (encoded as ushorts), where each entry is a node in the graph structure. To get the proper floating point 3D co-ordinates, divide each component by the divisors in the main file header. |
+| Field                 | Type                 | Description                                                                                                                                                                                                                                                                                                                                                             |
+| --------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| points[`Entry Count`] | Vertex[] (3x ushort) | An array of 3D points (encoded as ushorts), where each entry is a node in the graph structure. To get the proper floating point 3D co-ordinates, divide each component by the divisors in the main file header. There is one point for each __Segment__ in the navmesh, and it usually has the same position of the centremost __NavWorld__ point from this __Segment__ |
 
 ### Subsection 2 (Edge Counts)
 | Field                                 | Type                | Description                                                                                                                                                                       |
